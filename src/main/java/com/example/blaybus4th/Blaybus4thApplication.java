@@ -9,6 +9,7 @@ public class Blaybus4thApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(Blaybus4thApplication.class, args);
+
 	}
 
 }
