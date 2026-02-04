@@ -2,7 +2,6 @@ package com.example.blaybus4th.domain.member.controller;
 
 import com.example.blaybus4th.domain.member.dto.request.MemberLoginRequest;
 import com.example.blaybus4th.domain.member.service.MemberService;
-import com.example.blaybus4th.global.annotation.InjectMemberId;
 import com.example.blaybus4th.global.apiPayload.ApiResponse;
 import com.example.blaybus4th.global.security.service.JwtCookie;
 import jakarta.servlet.http.HttpServletResponse;
