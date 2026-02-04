@@ -1,7 +1,7 @@
-package com.example.blaybus4th.domain.AiChat.entity;
+package com.example.blaybus4th.domain.aiChat.entity;
 
 
-import com.example.blaybus4th.domain.AiChat.enums.SenderType;
+import com.example.blaybus4th.domain.aiChat.enums.SenderType;
 import com.example.blaybus4th.domain.member.entity.Member;
 import com.example.blaybus4th.domain.object.entity.Object;
 import jakarta.persistence.*;
