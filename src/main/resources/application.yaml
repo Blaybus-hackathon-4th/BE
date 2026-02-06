@@ -18,6 +18,6 @@ spring:
       show_sql: false # sql문 출력
       default_batch_fetch_size: 20
 
-
-
-
+logging:
+  level:
+    com.example.blaybus4th.domain: DEBUG

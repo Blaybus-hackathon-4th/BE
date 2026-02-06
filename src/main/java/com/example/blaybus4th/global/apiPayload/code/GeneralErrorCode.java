@@ -25,11 +25,13 @@ public enum GeneralErrorCode implements BaseErrorCode {
     FAIL_TO_RETRIEVE_NOTES(HttpStatus.INTERNAL_SERVER_ERROR, "NOTE500_4", "노트 조회에 실패했습니다."),
 
     // 멤버
-    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404_1", "존재하지 않는 회원입니다.")
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404_1", "존재하지 않는 회원입니다."),
 
+    // 오브젝트
+    OBJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "OBJECT404_1", "존재하지 않는 오브젝트입니다."),
 
-
-	;
+    // 직렬화 오류
+    JSON_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "JSON500_1" , "JSON 직렬화/역직렬화 처리 중 오류가 발생했습니다."),;
 
 	private final HttpStatus httpStatus;
 	private final String code;
