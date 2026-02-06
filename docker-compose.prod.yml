@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  app:
+    image: 957388138116.dkr.ecr.ap-northeast-2.amazonaws.com/simvex-backend:latest
+    container_name: simvex-backend
+    env_file:
+      - .env.prod
+    environment:
+      MEM0_BASE_URL: http://mem0:8000
+      JAVA_TOOL_OPTIONS: "-Xms512m -Xmx512m"
+    restart: unless-stopped
+    volumes:
+      - /var/log/simvex:/var/log/simvex
+    networks:
+      - simvex_network
+
+  mem0:
+    image: python:3.11-slim
+    container_name: mem0-server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file: .env.prod
+    volumes:
+      - mem0_data:/root/.mem0
+    command:
+      - /bin/bash
+      - -c
+      - |
+        pip install --no-cache-dir fastapi uvicorn mem0ai qdrant-client openai &&
+        
+        cat <<EOF > server.py
+        from fastapi import FastAPI, Request
+        from fastapi.responses import JSONResponse
+        from mem0 import Memory
+        import os
+        import traceback
+        
+        app = FastAPI()
+        
+        config = {
+            "vector_store": {
+                "provider": "qdrant",
+                "config": {"path": "/root/.mem0/qdrant"}
+            },
+            "llm": {
+                "provider": "openai",
+                "config": {
+                    "api_key": os.environ.get("OPENAI_API_KEY"),
+                    "model": "gpt-5-mini"
+                }
+            }
+        }
+        
+        try:
+            m = Memory.from_config(config)
+            print("DEBUG: Memory initialized")
+        except Exception as e:
+            print(f"FATAL: {e}")
+        
+        @app.post("/v1/memories")
+        async def add_memory(request: Request):
+            try:
+                data = await request.json()
+        
+                user_id = str(data.get("user_id"))
+                messages = data.get("messages")
+        
+                return m.add(messages, user_id=user_id)
+            except Exception as e:
+                traceback.print_exc()
+                return JSONResponse(status_code=500, content={"detail": str(e)})
+        
+        @app.post("/v1/memories/search")
+        async def search_memory(request: Request):
+            try:
+                data = await request.json()
+        
+        
+                user_id = str(data.get("user_id"))
+                query = data.get("query")
+        
+                print(f"DEBUG: Search req - user_id={user_id}, query={query}")
+                return m.search(query, user_id=user_id)
+            except Exception as e:
+                traceback.print_exc()
+                return JSONResponse(status_code=500, content={"detail": str(e)})
+        EOF
+        
+        uvicorn server:app --host 0.0.0.0 --port 8000
+
+volumes:
+  mem0_data:
+
+
+networks:
+  simvex_network:
