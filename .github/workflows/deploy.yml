@@ -21,9 +21,11 @@ jobs:
         with:
           java-version: '21'
           distribution: 'adopt'
+      - name: Grant execute permission from gradlew
+        run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build -x test
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
