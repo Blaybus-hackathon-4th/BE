@@ -1,5 +1,6 @@
 package com.example.blaybus4th.domain.object.entity;
 
+import com.example.blaybus4th.domain.object.entity.enums.ObjectCategory;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -31,7 +32,8 @@ public class Object {
     private String objectDescription;
 
     @Column(nullable = false)
-    private String objectCategory;
+    @Enumerated(EnumType.STRING)
+    private ObjectCategory objectCategory;
 
     @Column(nullable = false)
     private String objectThumbnail;
