@@ -26,4 +26,15 @@ public class ObjectQueryService {
                 ))
                 .toList();
     }
+
+    public List<ObjectResponseDTO.ObjectCardResponseDTO> getObjectsByIds(List<Long> ids) {
+        return objectRepository.findAllWithTagsByIds(ids).stream()
+                .map(o -> toObjectCardResponseDTO(
+                        o,
+                        o.getObjectTags().stream()
+                                .map(ot -> ot.getTag().getTagName())
+                                .toList()
+                ))
+                .toList();
+    }
 }

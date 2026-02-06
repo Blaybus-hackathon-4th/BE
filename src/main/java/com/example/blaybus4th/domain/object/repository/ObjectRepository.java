@@ -18,4 +18,13 @@ public interface ObjectRepository extends JpaRepository<Object, Long> {
     where (:category is null or o.objectCategory = :category)
     """)
     List<Object> findAllWithTags(ObjectCategory category);
+
+    @Query("""
+    select distinct o
+    from Object o
+    left join fetch o.objectTags ot
+    left join fetch ot.tag
+    where o.objectId in :ids
+""")
+    List<Object> findAllWithTagsByIds(@Param("ids") List<Long> ids);
 }

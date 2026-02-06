@@ -26,4 +26,15 @@ public class ObjectController {
     ){
         return ApiResponse.onSuccess(objectQueryService.getObjectLists(category));
     }
+
+    /**
+     * 오브젝트 선택 조회 api
+     * 담당자 : 이소정
+     */
+    @GetMapping("/by-ids")
+    public ApiResponse<List<ObjectResponseDTO.ObjectCardResponseDTO>> getObjectsByIds(
+            @RequestParam List<Long> ids
+    ){
+        return ApiResponse.onSuccess(objectQueryService.getObjectsByIds(ids));
+    }
 }
