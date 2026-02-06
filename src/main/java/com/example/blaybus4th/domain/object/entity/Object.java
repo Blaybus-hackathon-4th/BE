@@ -1,9 +1,13 @@
 package com.example.blaybus4th.domain.object.entity;
 
+import com.example.blaybus4th.domain.object.entity.enums.ObjectCategory;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,7 +32,8 @@ public class Object {
     private String objectDescription;
 
     @Column(nullable = false)
-    private String objectCategory;
+    @Enumerated(EnumType.STRING)
+    private ObjectCategory objectCategory;
 
     @Column(nullable = false)
     private String objectThumbnail;
@@ -36,6 +41,6 @@ public class Object {
     @Column(nullable = false, name = "is_visited", columnDefinition = "boolean default false")
     private boolean isVisited;
 
-
-
+    @OneToMany(mappedBy = "object", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ObjectTag> objectTags = new ArrayList<>();
 }
