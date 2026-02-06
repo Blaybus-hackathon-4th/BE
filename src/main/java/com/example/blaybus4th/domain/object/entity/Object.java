@@ -5,6 +5,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "Object")
@@ -36,6 +39,6 @@ public class Object {
     @Column(nullable = false, name = "is_visited", columnDefinition = "boolean default false")
     private boolean isVisited;
 
-
-
+    @OneToMany(mappedBy = "object", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ObjectTag> objectTags = new ArrayList<>();
 }
