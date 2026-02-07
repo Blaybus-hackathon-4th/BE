@@ -3,7 +3,10 @@ package com.example.blaybus4th.domain.aiChat.service;
 import com.example.blaybus4th.domain.aiChat.agent.ObjectHelperAgent;
 import com.example.blaybus4th.domain.aiChat.dto.request.AiChatRequest;
 import com.example.blaybus4th.domain.aiChat.dto.response.AiChatResponse;
+import com.example.blaybus4th.domain.aiChat.dto.response.ChatSessionResponse;
+import com.example.blaybus4th.domain.aiChat.entity.ChatSession;
 import com.example.blaybus4th.domain.aiChat.repository.AiChatRepository;
+import com.example.blaybus4th.domain.aiChat.repository.ChatSessionRepository;
 import com.example.blaybus4th.domain.aiChat.tool.Mem0Tools;
 import com.example.blaybus4th.domain.aiChat.tool.MemberContextHolder;
 import com.example.blaybus4th.domain.member.dto.response.InstitutionsListResponse;
@@ -36,6 +39,7 @@ public class AiChatService {
     private final ObjectMapper objectMapper;
     private final Mem0Service mem0Service; // 추가
     private final Mem0Tools mem0Tools;
+    private final ChatSessionRepository chatSessionRepository;
 
     @Transactional
     public AiChatResponse aiChat(Long objectId, Long memberId, AiChatRequest request) throws JsonProcessingException {
@@ -48,6 +52,10 @@ public class AiChatService {
 
             Object object = objectRepository.findById(objectId)
                     .orElseThrow(() -> new GeneralException(GeneralErrorCode.OBJECT_NOT_FOUND));
+
+            ChatSession session = chatSessionRepository.findById(request.getChatSessionId())
+                    .orElseThrow(() -> new GeneralException(GeneralErrorCode.CHAT_SESSION_NOT_FOUND));
+
 
             ChatMemory chatMemory = chatMemoryManager.memoryOf(memberId);
 
@@ -82,6 +90,30 @@ public class AiChatService {
 
 
     }
+
+    public List<ChatSessionResponse> getChatSession(Long objectId, Long memberId) {
+
+        List<ChatSession> chatSession = chatSessionRepository.findByObjectIdAndMemberId(memberId,objectId);
+
+        if (chatSession.isEmpty()) {
+            throw new GeneralException(GeneralErrorCode.CHAT_SESSION_NOT_FOUND);
+        }
+        return chatSession.stream()
+                .map(ChatSessionResponse::from)
+                .toList();
+
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 
     private String toJson(java.lang.Object object) {
@@ -128,7 +160,6 @@ public class AiChatService {
 
         return json;
     }
-
 
 }
 

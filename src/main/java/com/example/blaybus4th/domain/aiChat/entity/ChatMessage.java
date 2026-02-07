@@ -17,13 +17,10 @@ public class ChatMessage {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long chatMessageId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "object_id", nullable = false)
-    private Object object;
+    @JoinColumn(name = "chat_session_id", nullable = false)
+    private ChatSession chatSession;
 
     @Column(nullable = false)
     private String chatContent;

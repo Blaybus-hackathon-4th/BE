@@ -31,7 +31,10 @@ public enum GeneralErrorCode implements BaseErrorCode {
     OBJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "OBJECT404_1", "존재하지 않는 오브젝트입니다."),
 
     // 직렬화 오류
-    JSON_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "JSON500_1" , "JSON 직렬화/역직렬화 처리 중 오류가 발생했습니다."),;
+    JSON_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "JSON500_1" , "JSON 직렬화/역직렬화 처리 중 오류가 발생했습니다."),
+
+    // ai chat
+    CHAT_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "CHAT404_1" , "존재하지 않는 채팅 세션입니다."),;
 
 	private final HttpStatus httpStatus;
 	private final String code;

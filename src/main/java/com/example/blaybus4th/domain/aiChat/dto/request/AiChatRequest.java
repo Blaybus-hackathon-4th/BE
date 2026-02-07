@@ -8,6 +8,8 @@ public class AiChatRequest {
 
     private String userMessage;
 
+    private Long chatSessionId;
+
     private ViewState viewState;
 
 }

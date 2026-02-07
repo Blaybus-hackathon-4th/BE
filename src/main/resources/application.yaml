@@ -12,7 +12,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       format_sql: true # 보기편한 형식으로 출력
       show_sql: false # sql문 출력
