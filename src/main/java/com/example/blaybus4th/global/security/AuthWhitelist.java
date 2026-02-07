@@ -11,11 +11,11 @@ public class AuthWhitelist {
             "/api/v1/members/login",
             "/api/v1/members/institutions",
             "/swagger-ui/**",
+            "/swagger-ui/index.html",
             "/v3/api-docs/**",
             "/swagger-ui.html",
             "/swagger-resources/**",
-            "/api/v1/objects",
-            "/api/v1/objects/by-ids",
+            "/api/v1/objects/**",
     };
 
 

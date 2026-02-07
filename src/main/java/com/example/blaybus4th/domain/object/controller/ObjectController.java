@@ -37,4 +37,16 @@ public class ObjectController {
     ){
         return ApiResponse.onSuccess(objectQueryService.getObjectsByIds(ids));
     }
+
+    /**
+     * 오브젝트 부품 개별 정보 조회 api
+     * 담당자 : 이소정
+     */
+    @GetMapping("/components/{componentId}")
+    public ApiResponse<ObjectResponseDTO.ObjectComponentResponseDTO> getComponent(
+            @PathVariable Long componentId
+    ){
+        ObjectResponseDTO.ObjectComponentResponseDTO result = objectQueryService.getObjectComponentResponseDTO(componentId);
+        return ApiResponse.onSuccess(result);
+    }
 }
