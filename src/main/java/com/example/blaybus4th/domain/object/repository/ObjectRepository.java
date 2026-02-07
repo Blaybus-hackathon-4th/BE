@@ -27,4 +27,14 @@ public interface ObjectRepository extends JpaRepository<Object, Long> {
     where o.objectId in :ids
 """)
     List<Object> findAllWithTagsByIds(@Param("ids") List<Long> ids);
+
+    @Query("""
+    select distinct o
+    from Object o
+    left join fetch o.objectTags ot
+    left join fetch ot.tag
+    where lower(o.objectNameKr) like lower(concat('%', :keyword, '%'))
+       or lower(o.objectNameEn) like lower(concat('%', :keyword, '%'))
+""")
+    List<Object> findByObjectNameKrOrEn(@Param("keyword") String keyword);
 }

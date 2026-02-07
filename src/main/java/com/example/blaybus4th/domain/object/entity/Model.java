@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "Model")
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
@@ -71,4 +74,6 @@ public class Model {
     @Column(nullable = false,columnDefinition = "FLOAT")
     private Float explodeDistance; // 최대 이동 거리
 
+    @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ModelComponents> modelComponents = new ArrayList<>();
 }
