@@ -39,3 +39,16 @@ out/
 ### env 파일 ###
 .env
 .env.*
+
+### 테라폼 파일 ###
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.tfvars
+variables.tf
+*.pem
+*.pub
+*-key
+.terraform.lock.hcl
+### 테스트 파일 ####
+*.http
