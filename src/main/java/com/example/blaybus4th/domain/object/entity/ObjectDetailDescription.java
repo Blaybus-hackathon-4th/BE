@@ -6,6 +6,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "ObjectDetailDescription")
@@ -17,11 +22,17 @@ public class ObjectDetailDescription {
     private Long objectDetailId;
 
     @JoinColumn(name = "object_id", nullable = false)
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     private Object object;
 
     @Column(nullable = false,name = "object_detail_description")
     private String objectDetailDescription;
+
+    @OneToMany(mappedBy = "objectDetailDescription", cascade = CascadeType.ALL,orphanRemoval = true)
+    private Set<OperationPrinciple> operationPrinciples = new HashSet<>();
+
+    @OneToMany(mappedBy = "objectDetailDescription", cascade = CascadeType.ALL,orphanRemoval = true)
+    private Set<StructuralFeature> structuralFeatures = new HashSet<>();
 
 
 }

@@ -23,7 +23,7 @@ public interface ObjectHelperAgent {
                     응답 JSON 스키마:
                     {
                       "aiMessage": "string (사용자에게 보여줄 설명)",
-                      "chatSessionTitle" : "string (질문 기반 요약 제목 생성(최대 15자), 최초 대화 시에만 필요, 그 외에는 빈 문자열로 반환)",
+                      "chatSessionTitle" : "string (질문 기반 요약 제목 생성(최대 15자))",
                       "commands": [
                         {
                           "type": "string (SET_EXPLOSION | SELECT_PART | LOAD_SCENE 등)",

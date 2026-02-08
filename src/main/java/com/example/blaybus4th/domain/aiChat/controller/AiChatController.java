@@ -1,6 +1,8 @@
 package com.example.blaybus4th.domain.aiChat.controller;
 
 import com.example.blaybus4th.domain.aiChat.dto.request.AiChatRequest;
+import com.example.blaybus4th.domain.aiChat.dto.request.AiDocentRequest;
+import com.example.blaybus4th.domain.aiChat.dto.response.AiChatResponse;
 import com.example.blaybus4th.domain.aiChat.dto.response.ChatSessionResponse;
 import com.example.blaybus4th.domain.aiChat.service.AiChatService;
 import com.example.blaybus4th.global.annotation.InjectMemberId;
@@ -23,7 +25,7 @@ public class AiChatController {
      * 담당자 : 김영욱
      */
     @PostMapping("/{objectId}")
-    public ApiResponse<?> aiChat(
+    public ApiResponse<AiChatResponse> aiChat(
             @PathVariable Long objectId,
             @InjectMemberId Long memberId,
             @RequestBody AiChatRequest request
@@ -38,6 +40,15 @@ public class AiChatController {
     @GetMapping("/{objectId}")
     public ApiResponse<List<ChatSessionResponse>> getChatSession(@PathVariable Long objectId, @InjectMemberId Long memberId){
         return ApiResponse.onSuccess(aiChatService.getChatSession(objectId,memberId));
+    }
+
+
+    /**
+     * Ai 도슨트
+     */
+    @PostMapping("/docent")
+    public ApiResponse<?> aiDocent(@RequestBody AiDocentRequest request, @InjectMemberId Long memberId) throws JsonProcessingException {
+        return ApiResponse.onSuccess(aiChatService.aiDocent(request,memberId));
     }
 
 
