@@ -21,15 +21,15 @@ public class AiChatResponse {
 
     private String aiMessage;
 
-    private List<AiCommand> commands;
+//    private List<AiCommand> commands;
 
 
     public static AiChatResponse from(AiChatResponse response, ChatSession chatSession){
         return new AiChatResponse(
                 chatSession.getChatSessionId(),
                 chatSession.getChatSessionTitle(),
-                response.getAiMessage(),
-                response.getCommands()
+                response.getAiMessage()
+//                response.getCommands()
         );
     }
 

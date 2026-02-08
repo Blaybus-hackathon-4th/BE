@@ -60,9 +60,10 @@ public class AiChatService {
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
 
-            Object object = objectRepository.findById(objectId)
+//            Object object = objectRepository.findById(objectId)
+//                    .orElseThrow(() -> new GeneralException(GeneralErrorCode.OBJECT_NOT_FOUND));
+            Object object = objectRepository.findWithAllDetails(objectId)
                     .orElseThrow(() -> new GeneralException(GeneralErrorCode.OBJECT_NOT_FOUND));
-
             ChatSession chatSession;
 
             if (request.getChatSessionId() == null) {
@@ -78,9 +79,15 @@ public class AiChatService {
 
             ChatMemory chatMemory = chatMemoryManager.memoryOf(memberId);
 
-            String viewStateJson = toJson(request.getViewState());
+//            String viewStateJson = toJson(request.getViewState());
+
+            String engineeringPrinciple = principleContext(object);
+
+            String structuralCharacteristics = structuralContext(object);
 
             String mem0Memory = mem0Service.searchMemory(request.getUserMessage());
+
+            String objectName = object.getObjectNameKr()+" ("+object.getObjectNameEn()+")";
 
             if (mem0Memory.isEmpty()) {
                 mem0Memory = "관련된 과거 기억이 없습니다.";
@@ -95,8 +102,13 @@ public class AiChatService {
 
             String rawText = agent.chat(
                     request.getUserMessage(),
-                    viewStateJson,
-                    mem0Memory
+//                    viewStateJson,
+                    mem0Memory,
+                    engineeringPrinciple,
+                    structuralCharacteristics,
+                    objectName,
+                    object.getDetailDescriptions().getObjectDetailDescription()
+
             );
 
             String cleanJson = sanitizeJsonResponse(rawText);

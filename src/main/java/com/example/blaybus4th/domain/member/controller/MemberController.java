@@ -5,6 +5,7 @@ import com.example.blaybus4th.domain.member.dto.response.InstitutionsListRespons
 import com.example.blaybus4th.domain.member.service.MemberService;
 import com.example.blaybus4th.global.apiPayload.ApiResponse;
 import com.example.blaybus4th.global.security.service.JwtCookie;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,7 @@ public class MemberController {
      * 회원 로그인 api
      * 담당자 : 김영욱
      */
+    @Operation(summary = "회원 로그인",description = "회원 로그인을 수행합니다.")
     @PostMapping("/login")
     public ApiResponse<String> memberLogin(@RequestBody MemberLoginRequest request, HttpServletResponse response){
         log.debug("요청 정보 = {}", request);
@@ -38,6 +40,7 @@ public class MemberController {
      * 기관 목록 조회
      * 담당자 : 김영욱
      */
+    @Operation(summary = "기관 목록 조회",description = "기관 목록을 조회합니다.")
     @GetMapping("/institutions")
     public ApiResponse<List<InstitutionsListResponse>> getInstitutionsList(){
         return ApiResponse.onSuccess(memberService.getInstitutionsList());
