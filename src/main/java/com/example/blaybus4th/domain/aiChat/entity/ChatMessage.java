@@ -17,13 +17,10 @@ public class ChatMessage {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long chatMessageId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "object_id", nullable = false)
-    private Object object;
+    @JoinColumn(name = "chat_session_id", nullable = false)
+    private ChatSession chatSession;
 
     @Column(nullable = false)
     private String chatContent;
@@ -32,5 +29,24 @@ public class ChatMessage {
     @Column(nullable = false)
     private SenderType senderType;
 
+
+    public static ChatMessage userMessage(String content) {
+        ChatMessage message = new ChatMessage();
+        message.chatContent = content;
+        message.senderType = SenderType.USER;
+        return message;
+    }
+
+    public static ChatMessage aiMessage(String content) {
+        ChatMessage message = new ChatMessage();
+        message.chatContent = content;
+        message.senderType = SenderType.AI;
+        return message;
+    }
+
+
+    protected void setChatSession(ChatSession session) {
+        this.chatSession = session;
+    }
 
 }

@@ -46,5 +46,9 @@ out/
 .terraform/
 *.tfvars
 variables.tf
+*.pem
+*.pub
+*-key
+.terraform.lock.hcl
 ### 테스트 파일 ####
-.http
+*.http

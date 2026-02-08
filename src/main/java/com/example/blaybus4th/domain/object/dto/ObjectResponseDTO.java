@@ -1,5 +1,6 @@
 package com.example.blaybus4th.domain.object.dto;
 
+import com.example.blaybus4th.domain.object.entity.ModelComponents;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,5 +17,22 @@ public class ObjectResponseDTO {
         String objectNameEn;
         String objectcontent;
         List<String> objectTags;
+    }
+
+    @Getter
+    @Builder
+    public static class ObjectComponentResponseDTO{
+        Long componentId;
+        String componentNameKr;
+        String componentNameEn;
+        String componentContent;
+        List<ElementResponseDTO> elements;
+    }
+
+    @Getter
+    @Builder
+    public static class ElementResponseDTO{
+        String elementName;
+        String elementContent;
     }
 }

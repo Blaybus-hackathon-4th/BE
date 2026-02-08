@@ -8,6 +8,7 @@ import com.example.blaybus4th.domain.note.dto.response.NotesListResponse;
 import com.example.blaybus4th.domain.note.entity.Note;
 import com.example.blaybus4th.domain.note.repository.NoteRepository;
 import com.example.blaybus4th.domain.object.entity.Object;
+import com.example.blaybus4th.domain.object.repository.ObjectRepository;
 import com.example.blaybus4th.global.apiPayload.code.GeneralErrorCode;
 import com.example.blaybus4th.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
@@ -22,22 +23,20 @@ public class NoteService {
 
     private final NoteRepository noteRepository;
     private final MemberRepository memberRepository;
-//    private final ObjectRepository objectRepository;
+    private final ObjectRepository objectRepository;
 
 
-    /**
-     * Object 레파지토리 생성시 주석 해제
-     */
-//    @Transactional
-//    public void createNote(Long memberId, CreateNoteRequest request) {
-//        Member member = memberRepository.findById(memberId)
-//                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
-//        Object object = objectRepository.findById(request.getObjectId())
-//                .orElseThrow(() -> new IllegalArgumentException("Object not found"));
-//        Note note = Note.createNote(member, object, request.getNoteContent());
-//        noteRepository.save(note);
-//
-//    }
+
+    @Transactional
+    public void createNote(Long memberId, CreateNoteRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+        Object object = objectRepository.findById(request.getObjectId())
+                .orElseThrow(() -> new IllegalArgumentException("Object not found"));
+        Note note = Note.createNote(member, object, request.getNoteContent());
+        noteRepository.save(note);
+
+    }
     @Transactional
     public List<NotesListResponse> getNotesList(Long memberId, Long objectId) {
 
