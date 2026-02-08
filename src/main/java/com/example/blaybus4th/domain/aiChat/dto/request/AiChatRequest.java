@@ -10,6 +10,6 @@ public class AiChatRequest {
 
     private Long chatSessionId;
 
-    private ViewState viewState;
+//    private ViewState viewState;
 
 }

@@ -17,7 +17,20 @@ spring:
       format_sql: true # 보기편한 형식으로 출력
       show_sql: false # sql문 출력
       default_batch_fetch_size: 20
+springDoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    groups-order: DESC
+    operations-sorter: alpha
+    tags-sorter: alpha
+    display-request-duration: true
+    doc-expansion: none
 
 logging:
   level:
     com.example.blaybus4th.domain: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web.filter: DEBUG
+    org.springdoc: DEBUG

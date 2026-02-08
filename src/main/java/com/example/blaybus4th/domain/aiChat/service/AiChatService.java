@@ -1,8 +1,11 @@
 package com.example.blaybus4th.domain.aiChat.service;
 
+import com.example.blaybus4th.domain.aiChat.agent.DocentAgent;
 import com.example.blaybus4th.domain.aiChat.agent.ObjectHelperAgent;
 import com.example.blaybus4th.domain.aiChat.dto.request.AiChatRequest;
+import com.example.blaybus4th.domain.aiChat.dto.request.AiDocentRequest;
 import com.example.blaybus4th.domain.aiChat.dto.response.AiChatResponse;
+import com.example.blaybus4th.domain.aiChat.dto.response.AiDocentResponse;
 import com.example.blaybus4th.domain.aiChat.dto.response.ChatSessionResponse;
 import com.example.blaybus4th.domain.aiChat.entity.ChatMessage;
 import com.example.blaybus4th.domain.aiChat.entity.ChatSession;
@@ -10,24 +13,26 @@ import com.example.blaybus4th.domain.aiChat.repository.AiChatRepository;
 import com.example.blaybus4th.domain.aiChat.repository.ChatSessionRepository;
 import com.example.blaybus4th.domain.aiChat.tool.Mem0Tools;
 import com.example.blaybus4th.domain.aiChat.tool.MemberContextHolder;
-import com.example.blaybus4th.domain.member.dto.response.InstitutionsListResponse;
 import com.example.blaybus4th.domain.member.entity.Member;
 import com.example.blaybus4th.domain.member.repository.MemberRepository;
+import com.example.blaybus4th.domain.object.entity.*;
 import com.example.blaybus4th.domain.object.entity.Object;
+import com.example.blaybus4th.domain.object.repository.ModelRepository;
+import com.example.blaybus4th.domain.object.repository.ObjectDetailDescriptionRepository;
 import com.example.blaybus4th.domain.object.repository.ObjectRepository;
 import com.example.blaybus4th.global.apiPayload.code.GeneralErrorCode;
 import com.example.blaybus4th.global.apiPayload.exception.GeneralException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.memory.ChatMemory;
-import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.service.AiServices;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +48,8 @@ public class AiChatService {
     private final Mem0Service mem0Service; // 추가
     private final Mem0Tools mem0Tools;
     private final ChatSessionRepository chatSessionRepository;
+    private final ModelRepository modelRepository;
+    private final ObjectDetailDescriptionRepository objectDetailDescriptionRepository;
 
     @Transactional
     public AiChatResponse aiChat(Long objectId, Long memberId, AiChatRequest request) throws JsonProcessingException {
@@ -53,9 +60,10 @@ public class AiChatService {
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
 
-            Object object = objectRepository.findById(objectId)
+//            Object object = objectRepository.findById(objectId)
+//                    .orElseThrow(() -> new GeneralException(GeneralErrorCode.OBJECT_NOT_FOUND));
+            Object object = objectRepository.findWithAllDetails(objectId)
                     .orElseThrow(() -> new GeneralException(GeneralErrorCode.OBJECT_NOT_FOUND));
-
             ChatSession chatSession;
 
             if (request.getChatSessionId() == null) {
@@ -71,9 +79,15 @@ public class AiChatService {
 
             ChatMemory chatMemory = chatMemoryManager.memoryOf(memberId);
 
-            String viewStateJson = toJson(request.getViewState());
+//            String viewStateJson = toJson(request.getViewState());
+
+            String engineeringPrinciple = principleContext(object);
+
+            String structuralCharacteristics = structuralContext(object);
 
             String mem0Memory = mem0Service.searchMemory(request.getUserMessage());
+
+            String objectName = object.getObjectNameKr()+" ("+object.getObjectNameEn()+")";
 
             if (mem0Memory.isEmpty()) {
                 mem0Memory = "관련된 과거 기억이 없습니다.";
@@ -88,8 +102,13 @@ public class AiChatService {
 
             String rawText = agent.chat(
                     request.getUserMessage(),
-                    viewStateJson,
-                    mem0Memory
+//                    viewStateJson,
+                    mem0Memory,
+                    engineeringPrinciple,
+                    structuralCharacteristics,
+                    objectName,
+                    object.getDetailDescriptions().getObjectDetailDescription()
+
             );
 
             String cleanJson = sanitizeJsonResponse(rawText);
@@ -103,7 +122,7 @@ public class AiChatService {
             ChatMessage aiMessage = ChatMessage.aiMessage(response.getAiMessage());
             chatSession.addMessage(aiMessage);
 
-            return response;
+            return AiChatResponse.from(response, chatSession);
 
         } finally {
             MemberContextHolder.clear();
@@ -111,7 +130,6 @@ public class AiChatService {
 
 
     }
-
 
 
     @Transactional
@@ -126,6 +144,182 @@ public class AiChatService {
                 .map(ChatSessionResponse::from)
                 .toList();
 
+    }
+
+
+    @Transactional
+    public java.lang.Object aiDocent(AiDocentRequest request, Long memberId) throws JsonProcessingException {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
+
+        Model model = modelRepository.findWithComponent(request.getModelId())
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MODEL_NOT_FOUND));
+
+        Object object = objectRepository.findWithAllDetails(request.getObjectId())
+                .orElseThrow(() -> new GeneralException(GeneralErrorCode.OBJECT_NOT_FOUND));
+
+        List<Model> allModels = modelRepository.findAllExcludingCurrentId(request.getModelId());
+        String allModelsContext = generateAllModelsContext(allModels);
+
+
+        ChatSession chatSession;
+        if (request.getChatSessionId() == null) {
+            chatSession = ChatSession.createChatSession(member, object);
+            chatSessionRepository.save(chatSession);
+        } else {
+            chatSession = chatSessionRepository.findById(request.getChatSessionId())
+                    .orElseThrow(() -> new GeneralException(GeneralErrorCode.CHAT_SESSION_NOT_FOUND));
+        }
+
+        chatSession.addMessage(ChatMessage.userMessage(request.getUserMessage()));
+
+        String componentContext = generateComponentContext(model);
+
+        String modelContext = generateModelContext(model, object);
+
+        String engineeringPrinciple = principleContext(object);
+
+        String structuralCharacteristics = structuralContext(object);
+
+        String partId = request.getSelectedPartId() != null ?
+                String.valueOf(request.getSelectedPartId()) : "선택한 부품이 없습니다.";
+
+        String cameraPosition = objectMapper.writeValueAsString(request.getViewState().getCameraPosition());
+
+        String mem0Memory = mem0Service.searchMemory(request.getUserMessage());
+        if (mem0Memory == null || mem0Memory.isEmpty()) {
+            mem0Memory = "관련 기록이 없습니다.";
+        }
+
+        ChatMemory chatMemory = chatMemoryManager.memoryOf(memberId);
+
+        DocentAgent agent = AiServices.builder(DocentAgent.class)
+                .chatModel(aiServiceRegistry.getChatModel())
+                .chatMemory(chatMemory)
+                .tools(mem0Tools)
+                .build();
+
+        String rawResponse = agent.chat(
+                request.getUserMessage(),
+                partId,
+                mem0Memory,
+                modelContext,
+                componentContext,
+                request.getViewState().getExplosionValue(),
+                engineeringPrinciple,
+                structuralCharacteristics,
+                cameraPosition,
+                allModelsContext
+        );
+
+
+        String cleanJson = sanitizeJsonResponse(rawResponse);
+
+        AiDocentResponse response = objectMapper.readValue(cleanJson, AiDocentResponse.class);
+
+        ChatMessage aiMessage = ChatMessage.aiMessage(response.getAiMessage());
+
+
+        chatSession.addMessage(aiMessage);
+
+        if (chatSession.getChatSessionTitle().isEmpty()) {
+            chatSession.updateTitle(response.getChatSessionTitle());
+        }
+
+        return AiDocentResponse.from(response, chatSession);
+    }
+
+    private String generateAllModelsContext(List<Model> allModels) {
+        if (allModels.isEmpty()) {
+            return "전환 가능한 다른 모델이 없습니다.";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("전환 가능한 다른 모델 목록 (질문이 현재 모델과 관계없을 때 참조):\n");
+        for (Model model : allModels) {
+            sb.append("========================================\n");
+            sb.append("Model ID: ").append(model.getModelId()).append("\n");
+            sb.append("Name: ").append(model.getModelNameKr())
+                    .append(" (").append(model.getModelNameEn()).append(")\n");
+            sb.append("Description: ").append(model.getModelContent()).append("\n");
+            sb.append("Components List:\n");
+            if (model.getModelComponents().isEmpty()) {
+                sb.append("(등록된 부품 없음)\n");
+            } else {
+                for (ModelComponents c : model.getModelComponents()) {
+                    sb.append("   - [ID:").append(c.getModelComponentsId()).append("] ")
+                            .append(c.getModelComponentsName())
+                            .append(": ")
+                            .append(c.getModelComponentsContent())
+                            .append("\n");
+                }
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+
+    private String structuralContext(Object object) {
+        ObjectDetailDescription detail = object.getDetailDescriptions();
+
+        if (detail == null || detail.getStructuralFeatures().isEmpty()) {
+            return "등록된 구조적 특징 정보가 없습니다.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("모델의 구조적 특징:\n");
+        for (StructuralFeature feature : detail.getStructuralFeatures()) {
+            sb.append("- ")
+                    .append(feature.getStructuralFeatureDescription())
+                    .append("\n");
+        }
+
+        return sb.toString();
+    }
+
+    private String principleContext(Object object) {
+        ObjectDetailDescription detail = object.getDetailDescriptions();
+        if (detail == null || detail.getOperationPrinciples().isEmpty()) {
+            return "모델의 작동원리 정보가 없습니다.";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("모델의 작동 원리 : ");
+        detail.getOperationPrinciples().stream()
+                .sorted(Comparator.comparing(OperationPrinciple::getOperationPrincipleOrder))
+                .forEach(principle -> {
+                    sb.append(principle.getOperationPrincipleOrder())
+                            .append(". ")
+                            .append(principle.getOperationPrincipleDescription())
+                            .append("\n");
+                });
+        return sb.toString();
+    }
+
+
+    private String generateModelContext(Model model, Object object) {
+        return "모델의 정보는 다음과 같습니다:\n" +
+                "모델id: " + model.getModelId() + "\n" +
+                "모델의 영문명: " + model.getModelNameEn() + "\n" +
+                "모델의 한글명: " + model.getModelNameKr() + "\n" +
+                "모델 설명: " + object.getDetailDescriptions().getObjectDetailDescription() + "\n";
+    }
+
+
+    private String generateComponentContext(Model model) {
+        List<ModelComponents> modelComponents = model.getModelComponents();
+        if (modelComponents == null || modelComponents.isEmpty()) {
+            return "등록된 부품 정보가 없습니다. 제공된 오브젝트를 위주로 설명하세요";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("이 오브젝트의 부품들은 다음과 같습니다:\n");
+        for (ModelComponents component : modelComponents) {
+            sb.append("- 부품id: ").append(component.getModelComponentsId()).append("\n");
+            sb.append(" 부품명: ").append(component.getModelComponentsName()).append("\n");
+            sb.append(" 설명: ").append(component.getModelComponentsContent()).append("\n\n");
+        }
+        return sb.toString();
     }
 
 
@@ -166,13 +360,13 @@ public class AiChatService {
 
 
         json = json.replaceAll("[\\p{Cntrl}&&[^\r\n\t]]", "");
-        json = json.replaceAll("\\}\\]\\s*\"", "}],");
-        json = json.replaceAll("\\]\"\\s*,\\s*\"", "],\"");
-        json = json.replaceAll("\\}\"\\s*,\\s*\"", "},\"");
+        json = json.replaceAll("}]\\s*\"", "],");
+        json = json.replaceAll("]\"\\s*,\\s*\"", "],\"");
+        json = json.replaceAll("}\"\\s*,\\s*\"", "},\"");
 
 
         return json;
     }
 
-}
 
+}

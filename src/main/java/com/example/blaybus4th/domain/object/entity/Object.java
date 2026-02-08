@@ -43,4 +43,7 @@ public class Object {
 
     @OneToMany(mappedBy = "object", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ObjectTag> objectTags = new ArrayList<>();
+
+    @OneToOne(mappedBy = "object", cascade = CascadeType.ALL)
+    private ObjectDetailDescription detailDescriptions;
 }

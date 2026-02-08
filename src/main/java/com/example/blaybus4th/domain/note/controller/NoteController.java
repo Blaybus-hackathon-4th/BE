@@ -8,6 +8,7 @@ import com.example.blaybus4th.domain.note.dto.response.NotesListResponse;
 import com.example.blaybus4th.domain.note.service.NoteService;
 import com.example.blaybus4th.global.annotation.InjectMemberId;
 import com.example.blaybus4th.global.apiPayload.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,16 +27,18 @@ public class NoteController {
      * 담당자 : 김영욱
      * object 레파지토리 생성시 주석 해제
      */
-//    @PostMapping()
-//    public ApiResponse<String> createNote(@InjectMemberId Long memberId, @RequestBody CreateNoteRequest request){
-//        noteService.createNote(memberId,request);
-//        return ApiResponse.onSuccess("노트 생성이 완료되었습니다.");
-//    }
+    @Operation(summary = "노트 생성",description = "노트를 생성합니다.")
+    @PostMapping()
+    public ApiResponse<String> createNote(@InjectMemberId Long memberId, @RequestBody CreateNoteRequest request){
+        noteService.createNote(memberId,request);
+        return ApiResponse.onSuccess("노트 생성이 완료되었습니다.");
+    }
 
     /**
      * 노트 조회
      * 담당자 : 김영욱
      */
+    @Operation(summary = "노트 조회",description = "특정 오브젝트에 대한 노트 목록을 조회합니다.")
     @GetMapping()
     public ApiResponse<List<NotesListResponse>> getNotesList(@InjectMemberId Long memberId, @RequestParam Long objectId){
         return ApiResponse.onSuccess(noteService.getNotesList(memberId,objectId));
@@ -45,6 +48,7 @@ public class NoteController {
      * 노트 수정
      * 담당자 : 김영욱
      */
+    @Operation(summary = "노트 수정",description = "노트를 수정합니다.")
     @PatchMapping("/{noteId}")
     public ApiResponse<String> updateNote(@PathVariable Long noteId,@RequestBody UpdateNoteRequest request){
         noteService.updateNote(noteId,request);
@@ -55,6 +59,7 @@ public class NoteController {
      * 노트 삭제
      * 담당자 : 김영욱
      */
+    @Operation(summary = "노트 삭제",description = "노트를 삭제합니다.")
     @DeleteMapping("/{noteId}")
     public ApiResponse<String> deleteNote(@PathVariable Long noteId){
         noteService.deleteNote(noteId);
