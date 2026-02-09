@@ -50,4 +50,7 @@ public class Object {
     @OneToMany(mappedBy = "object", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Model> model = new ArrayList<>();
 
+
+    @OneToMany(mappedBy = "object", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Model> models = new ArrayList<>();
 }

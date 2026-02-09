@@ -65,4 +65,16 @@ public class ObjectController {
     ){
         return ApiResponse.onSuccess(objectQueryService.searchObjects(keyword));
     }
+
+    /**
+     * 오브젝트 키워드 검색 api
+     * 담당자 : 이소정
+     */
+    @GetMapping("/{objectId}/details")
+    @Operation(summary = "오브젝트 상세 정보 조회",description = "오브젝트를 상세 조회합니다.")
+    public ApiResponse<ObjectResponseDTO.ObjectDetailsResponseDTO> searchObject(
+            @PathVariable Long objectId
+    ){
+        return ApiResponse.onSuccess(objectQueryService.getObjectDetails(objectId));
+    }
 }

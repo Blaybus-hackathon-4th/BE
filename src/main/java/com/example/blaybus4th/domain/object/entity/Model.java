@@ -74,6 +74,27 @@ public class Model {
     @Column(nullable = false,columnDefinition = "FLOAT")
     private Float explodeDistance; // 최대 이동 거리
 
+    @Column(nullable = false, columnDefinition = "FLOAT")
+    private Float camPosX;
+
+    @Column(nullable = false, columnDefinition = "FLOAT")
+    private Float camPosY;
+
+    @Column(nullable = false, columnDefinition = "FLOAT")
+    private Float camPosZ;
+
+    @Column(nullable = false, columnDefinition = "FLOAT")
+    private Float camTargetX;
+
+    @Column(nullable = false, columnDefinition = "FLOAT")
+    private Float camTargetY;
+
+    @Column(nullable = false, columnDefinition = "FLOAT")
+    private Float camTargetZ;
+
+    @Column(nullable = false, columnDefinition = "FLOAT")
+    private Float camFov;
+
     @OneToMany(mappedBy = "model", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ModelComponents> modelComponents = new ArrayList<>();
 }
