@@ -42,8 +42,6 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
              where m.object.objectId = :objectId
     """)
     List<Model> findAllByObjectId(Long objectId);
-    List<Model> findAllExcludingCurrentId(Long modelId);
-
     @Query("""
     select distinct m
       from Model m
@@ -51,18 +49,7 @@ public interface ModelRepository extends JpaRepository<Model, Long> {
      where m.modelId in :modelIds
 """)
     List<Model> findAllByIdsWithComponents(List<Long> modelIds);
-    @Query("""
-            select distinct m
-              from Model m
-              left join fetch m.modelComponents
-             where m.object.objectId = :objectId
-            """)
-    List<Model> findAllByObject(Long objectId);
 
-    @Query("""
-            select distinct m
-              from Model m
-             where m.object.objectId = :objectId
-    """)
-    List<Model> findAllByObjectId(Long objectId);
+
+
 }
