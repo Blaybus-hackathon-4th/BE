@@ -5,12 +5,14 @@ import com.example.blaybus4th.domain.aiChat.enums.CommandType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class AiDocentResponse {
 
     private String thought;

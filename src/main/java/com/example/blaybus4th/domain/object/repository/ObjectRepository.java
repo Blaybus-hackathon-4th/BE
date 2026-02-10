@@ -49,4 +49,12 @@ public interface ObjectRepository extends JpaRepository<Object, Long> {
                  where o.objectId = :objectId
             """)
     Optional<Object> findWithAllDetails(Long objectId);
+
+    @Query("""
+              select distinct o
+              from Object o
+             where o.objectId <> :objectId
+            """
+    )
+    List<Object> findAllExcludingCurrentId(Long objectId);
 }

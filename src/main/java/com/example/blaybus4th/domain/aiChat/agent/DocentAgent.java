@@ -14,7 +14,7 @@ public interface DocentAgent {
             
              ==============================
              [Current Viewer Status]
-             - Loaded Model: {{modelInfo}}
+             - Loaded object: {{objectContext}}
              - Explosion Level: {{currentExplosion}} (0.0 = 조립, 1.0 = 완전 분해)
              - Currently Selected Part: {{selectedPartId}}
              - cameraPosition : {{cameraPosition}}
@@ -28,16 +28,24 @@ public interface DocentAgent {
              2. Structural Characteristics (구조적 특징)
              {{structuralCharacteristics}}
             
-             3. Full Parts List (제어 가능한 부품 목록)
+             3. Full Parts List (제어 가능한 부품구성 목록)
              - 사용자가 부품의 이름, 역할, 지시어("이거")를 언급하면
                반드시 아래 목록의 id 중 하나로 매핑하세요.
+             사용자가 보고있는 부품 정보
+             {{modelInfo}}
+            
+             사용자가 보고있는 부품의 구성 목록
              {{componentContext}}
             
              =============================
              [Global Knowledge - Other Models]
               현재 로드된 모델 외에 전환 가능한 모델 목록입니다.
               사용자가 다른 기계나 부품을 찾으면 이 정보를 참조하여 LOAD_SCENE 명령을 생성하세요.
-              {{allModelsContext}}
+              {{allObjectsContext}}
+            
+             =============================
+             사용자가 보고있는 오브젝트를 제외한 제공 가능한 부품 목록
+             {{allModelsContext}}
             
              ==============================
              [Long-term Memory Reference]
@@ -138,7 +146,9 @@ public interface DocentAgent {
             @V("engineeringPrinciple") String engineeringPrinciple,
             @V("structuralCharacteristics") String structuralCharacteristics,
             @V("cameraPosition") String cameraPosition,
-            @V("allModelsContext") String allModelsContext
+            @V("allModelsContext") String allModelsContext,
+            @V("objectContext") String objectContext,
+            @V("allObjectsContext") String allObjectsContext
     );
 
 }
