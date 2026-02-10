@@ -37,13 +37,15 @@ public class AiDocentResponse {
         private Double value;
 
         // SELECT_PART 용
-        private String targetId; // 부품 id
+        private String modelId;
 
         // HIGHLIGHT_PARTS 용
-        private List<String> targetIds; // 부품 id 리스트
+        private List<String> modelIds; // 부품 id 리스트
 
         // LOAD_SCENE 용
-        private String modelId;
+        private String objectId;
+        private String followUpMessage;
+
     }
 
 

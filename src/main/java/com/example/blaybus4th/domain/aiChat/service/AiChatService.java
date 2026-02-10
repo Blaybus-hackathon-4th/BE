@@ -9,6 +9,7 @@ import com.example.blaybus4th.domain.aiChat.dto.response.AiDocentResponse;
 import com.example.blaybus4th.domain.aiChat.dto.response.ChatSessionResponse;
 import com.example.blaybus4th.domain.aiChat.entity.ChatMessage;
 import com.example.blaybus4th.domain.aiChat.entity.ChatSession;
+import com.example.blaybus4th.domain.aiChat.enums.CommandType;
 import com.example.blaybus4th.domain.aiChat.repository.AiChatRepository;
 import com.example.blaybus4th.domain.aiChat.repository.ChatSessionRepository;
 import com.example.blaybus4th.domain.aiChat.tool.Mem0Tools;
@@ -87,7 +88,7 @@ public class AiChatService {
 
             String mem0Memory = mem0Service.searchMemory(request.getUserMessage());
 
-            String objectName = object.getObjectNameKr()+" ("+object.getObjectNameEn()+")";
+            String objectName = object.getObjectNameKr() + " (" + object.getObjectNameEn() + ")";
 
             if (mem0Memory.isEmpty()) {
                 mem0Memory = "관련된 과거 기억이 없습니다.";
@@ -148,18 +149,25 @@ public class AiChatService {
 
 
     @Transactional
-    public java.lang.Object aiDocent(AiDocentRequest request, Long memberId) throws JsonProcessingException {
+    public AiDocentResponse aiDocent(AiDocentRequest request, Long memberId) throws JsonProcessingException {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.MEMBER_NOT_FOUND));
 
-        Model model = modelRepository.findWithComponent(request.getModelId())
-                .orElseThrow(() -> new GeneralException(GeneralErrorCode.MODEL_NOT_FOUND));
-
         Object object = objectRepository.findWithAllDetails(request.getObjectId())
                 .orElseThrow(() -> new GeneralException(GeneralErrorCode.OBJECT_NOT_FOUND));
 
-        List<Model> allModels = modelRepository.findAllExcludingCurrentId(request.getModelId());
+        Model model = null;
+        List<Model> allModels;
+        if (request.getModelId() != null) {
+            model = modelRepository.findWithComponent(request.getModelId())
+                    .orElseThrow(() -> new GeneralException(GeneralErrorCode.MODEL_NOT_FOUND));
+            allModels = modelRepository.findAllExcludingCurrentId(request.getModelId());
+        } else {
+            allModels = modelRepository.findAllByObject(request.getObjectId());
+        }
+
+
         String allModelsContext = generateAllModelsContext(allModels);
 
 
@@ -182,10 +190,16 @@ public class AiChatService {
 
         String structuralCharacteristics = structuralContext(object);
 
-        String partId = request.getSelectedPartId() != null ?
-                String.valueOf(request.getSelectedPartId()) : "선택한 부품이 없습니다.";
+        String partId = request.getModelId() != null ?
+                String.valueOf(request.getModelId()) : "선택한 부품이 없습니다.";
 
-        String cameraPosition = objectMapper.writeValueAsString(request.getViewState().getCameraPosition());
+        String cameraPosition = (request.getViewState() != null && request.getViewState().getCameraPosition() != null)
+                ? objectMapper.writeValueAsString(request.getViewState().getCameraPosition())
+                : "[0, 0, 0]";
+
+        Double explosionValue = (request.getViewState() != null)
+                ? request.getViewState().getExplosionValue()
+                : 0.0;
 
         String mem0Memory = mem0Service.searchMemory(request.getUserMessage());
         if (mem0Memory == null || mem0Memory.isEmpty()) {
@@ -206,22 +220,41 @@ public class AiChatService {
                 mem0Memory,
                 modelContext,
                 componentContext,
-                request.getViewState().getExplosionValue(),
+                explosionValue,
                 engineeringPrinciple,
                 structuralCharacteristics,
                 cameraPosition,
                 allModelsContext
         );
 
-
         String cleanJson = sanitizeJsonResponse(rawResponse);
-
         AiDocentResponse response = objectMapper.readValue(cleanJson, AiDocentResponse.class);
-
         ChatMessage aiMessage = ChatMessage.aiMessage(response.getAiMessage());
-
-
         chatSession.addMessage(aiMessage);
+
+        chatSessionRepository.save(chatSession);
+
+        log.debug("response 팔로우메시지 : {}", response.getCommands().getFirst().getFollowUpMessage());
+
+        if (response.getCommands() != null && !response.getCommands().isEmpty()) {
+            AiDocentResponse.ViewerCommander firstCommand = response.getCommands().getFirst();
+            if (firstCommand.getType() == CommandType.LOAD_SCENE) {
+                Object targetObject = objectRepository.findById(Long.parseLong(firstCommand.getObjectId()))
+                        .orElseThrow(() -> new GeneralException(GeneralErrorCode.OBJECT_NOT_FOUND));
+                ChatSession newSession = ChatSession.createChatSession(member, targetObject);
+                newSession.updateTitle(targetObject.getObjectNameKr() + " 학습");
+                chatSessionRepository.save(newSession);
+                String followUpMsg = firstCommand.getFollowUpMessage();
+                if (followUpMsg != null && !followUpMsg.trim().isEmpty()) {
+                    ChatMessage followUpChatMessage = ChatMessage.aiMessage(followUpMsg);
+                    newSession.addMessage(followUpChatMessage);
+                    chatSessionRepository.save(newSession);
+                }
+
+                return AiDocentResponse.from(response, newSession);
+            }
+        }
+
 
         if (chatSession.getChatSessionTitle().isEmpty()) {
             chatSession.updateTitle(response.getChatSessionTitle());
@@ -298,6 +331,9 @@ public class AiChatService {
 
 
     private String generateModelContext(Model model, Object object) {
+        if (model == null) {
+            return "선택된 모델 정보가 없습니다.";
+        }
         return "모델의 정보는 다음과 같습니다:\n" +
                 "모델id: " + model.getModelId() + "\n" +
                 "모델의 영문명: " + model.getModelNameEn() + "\n" +
