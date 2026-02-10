@@ -17,6 +17,7 @@ public class AuthWhitelist {
             "/swagger-ui.html",
             "/swagger-resources/**",
             "/api/v1/objects/**",
+            "/api/v1/quizzes/**"
     };
 
 

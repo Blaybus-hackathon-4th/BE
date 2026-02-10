@@ -34,5 +34,10 @@ public class ObjectDetailDescription {
     @OneToMany(mappedBy = "objectDetailDescription", cascade = CascadeType.ALL,orphanRemoval = true)
     private Set<StructuralFeature> structuralFeatures = new HashSet<>();
 
+    @OneToMany(mappedBy = "objectDetailDescription", cascade = CascadeType.ALL,orphanRemoval = true)
+    private Set<Advantage> advantages = new HashSet<>();
+
+    @OneToMany(mappedBy = "objectDetailDescription", cascade = CascadeType.ALL,orphanRemoval = true)
+    private Set<Disadvantage> disadvantages = new HashSet<>();
 
 }

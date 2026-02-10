@@ -10,8 +10,6 @@ public class AiDocentRequest {
 
     private Long modelId;
 
-    private Long selectedPartId; // 선택한 부품 id
-
     private String userMessage;
 
     private Long chatSessionId;

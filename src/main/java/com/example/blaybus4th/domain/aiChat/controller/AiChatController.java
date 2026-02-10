@@ -3,6 +3,7 @@ package com.example.blaybus4th.domain.aiChat.controller;
 import com.example.blaybus4th.domain.aiChat.dto.request.AiChatRequest;
 import com.example.blaybus4th.domain.aiChat.dto.request.AiDocentRequest;
 import com.example.blaybus4th.domain.aiChat.dto.response.AiChatResponse;
+import com.example.blaybus4th.domain.aiChat.dto.response.AiDocentResponse;
 import com.example.blaybus4th.domain.aiChat.dto.response.ChatSessionResponse;
 import com.example.blaybus4th.domain.aiChat.service.AiChatService;
 import com.example.blaybus4th.global.annotation.InjectMemberId;
@@ -53,7 +54,7 @@ public class AiChatController {
      */
     @Operation(summary = "AI 도슨트",description = "도슨트 AI 대화를 요청합니다.")
     @PostMapping("/docent")
-    public ApiResponse<?> aiDocent(@RequestBody AiDocentRequest request, @InjectMemberId Long memberId) throws JsonProcessingException {
+    public ApiResponse<AiDocentResponse> aiDocent(@RequestBody AiDocentRequest request, @InjectMemberId Long memberId) throws JsonProcessingException {
         return ApiResponse.onSuccess(aiChatService.aiDocent(request,memberId));
     }
 
